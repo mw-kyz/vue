@@ -138,6 +138,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 是先实例化一个渲染Watcher，在它的回调函数中会调用 updateComponent 方法，
+// 在此方法中调用 vm._render 方法先生成虚拟 Node，最终调用 vm._update 更新 DOM
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -194,6 +196,8 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // Watcher 在这里起到两个作用，一个是初始化的时候会执行回调函数，
+  // 另一个是当 vm 实例中的监测的数据发生变化的时候执行回调函数
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
@@ -205,7 +209,9 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
+  // vm.$vnode 表示 Vue 实例的父虚拟 Node，所以它为 Null 则表示当前是根 Vue 的实例。
   if (vm.$vnode == null) {
+    // 设置 vm._isMounted 为 true， 表示这个实例已经挂载了，同时执行 mounted 钩子函数
     vm._isMounted = true
     callHook(vm, 'mounted')
   }
@@ -335,14 +341,19 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
 
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
+  // 调用生命周期挂钩时禁用dep收集
   pushTarget()
+  // 缓存用户定义的钩子的回调
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
+  // 如果用户定义了钩子的回调
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
+      // 执行钩子回调，同时捕获错误
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  // initEvents是初始化事件相关的处理，会将_hasHookEvent初始赋值为false
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

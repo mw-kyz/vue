@@ -35,6 +35,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+// 使用Object.defineProperty将属性key代理到target对象的sourceKey属性对象上
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -61,6 +62,7 @@ export function initState (vm: Component) {
   }
 }
 
+// 初始化props属性，并把props的每一个属性都代理到vm._props对象上（使用的defineProperty，不要被proxy这个方法名字迷惑了，不是使用的Proxy）
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -109,6 +111,7 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// 初始化data属性，并把data的每一个属性都代理到vm._data对象上（使用的defineProperty，不要被proxy这个方法名字迷惑了，不是使用的Proxy）
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'

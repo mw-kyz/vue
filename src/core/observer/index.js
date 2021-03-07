@@ -106,7 +106,9 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ * 尝试为值创建观察者实例，如果观察成功，则返回新的观察者，或者返回现有的观察器（如果值已经有一个观察器）。
  */
+
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
     return
@@ -131,6 +133,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
+ * 在一个对象上定义响应式属性
  */
 export function defineReactive (
   obj: Object,

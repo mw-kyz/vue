@@ -13,7 +13,9 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // 在原型上添加_init方法
   Vue.prototype._init = function (options?: Object) {
+    // vm指向Vue这个构造函数的实例化对象
     const vm: Component = this
     // a uid
     vm._uid = uid++
@@ -27,12 +29,18 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
+    // 避免被观察的标志
     vm._isVue = true
     // merge options
+    // 合并配置项
     if (options && options._isComponent) {
       // optimize internal component instantiation
+      // 优化内部组件实例化
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      // 因为动态选项合并非常慢，而且没有任何内部组件选项需要特殊处理
+
+      // 初始化内部组件？
       initInternalComponent(vm, options)
     } else {
       vm.$options = mergeOptions(
@@ -43,21 +51,31 @@ export function initMixin (Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // 使用Proxy方法代理vm对象，然后再重新赋值给vm._renderProxy 
       initProxy(vm)
     } else {
       vm._renderProxy = vm
     }
     // expose real self
     vm._self = vm
+    // 初始化生命周期
     initLifecycle(vm)
+    // 初始化事件中心
     initEvents(vm)
+    // 初始化渲染
     initRender(vm)
+    // 触发beforeCreate钩子函数，1、执行用户定义的beforeCreate生命周期 2、当用户注册了this.$on('hook:beforeCreate', function() {})时，会调用emit发送beforeCreate事件
     callHook(vm, 'beforeCreate')
+    // 在data和props属性之前注入inject，也就是初始化inject
     initInjections(vm) // resolve injections before data/props
+    // 初始化data、props、methods、computed、watch
     initState(vm)
+    // 在data和props之后注入provide，也就是初始化provide，provide是和inject搭配使用的，provide提供数据，inject接收数据
     initProvide(vm) // resolve provide after data/props
-    callHook(vm, 'created')
+     // 触发created 钩子函数，1、执行用户定义的created生命周期 2、当用户注册了this.$on('hook:created', function() {})时，会调用emit发送created事件
 
+    callHook(vm, 'created')
+  
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false)
@@ -65,6 +83,8 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    // 检测到如果有 el 属性，则调用 vm.$mount 方法挂载 vm，
+    // 挂载的目标就是把模板渲染成最终的 DOM
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
